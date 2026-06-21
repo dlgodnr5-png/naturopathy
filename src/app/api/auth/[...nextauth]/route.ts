@@ -13,7 +13,7 @@ const handler = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async session({ session, token, user }) {
+    async session({ session }) {
       // Send properties to the client, like an access_token and user id from a provider.
       return session;
     },

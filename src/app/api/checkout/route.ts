@@ -9,6 +9,11 @@ export async function POST(req: Request) {
     // 1. Validate items and calculate total from DB (not from client)
     // 2. Initialize payment with the selected provider (PayPal, KCP, etc.)
     // 3. Return a payment token or redirect URL
+    console.log("Initializing checkout", {
+      itemsCount: items?.length,
+      customerEmail: customer?.email,
+      paymentMethod
+    });
 
     return NextResponse.json({
       success: true,
@@ -17,6 +22,7 @@ export async function POST(req: Request) {
       paymentToken: "mock_token_abc"
     });
   } catch (error) {
+    console.error("Checkout endpoint error:", error);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }

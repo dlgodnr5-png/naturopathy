@@ -18,6 +18,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: invoiceData });
   } catch (error) {
+    console.error("Invoice endpoint error:", error);
     return NextResponse.json({ success: false, error: "Failed to generate invoice" }, { status: 500 });
   }
 }

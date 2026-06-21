@@ -2,7 +2,16 @@
 
 import { useCart } from "../../../context/CartContext";
 
-export default function AddToCartButton({ product }: { product: any }) {
+interface Product {
+  id: string;
+  name: string;
+  priceCents: number;
+  category: string;
+  imageUrl: string | null;
+  isDigital: boolean;
+}
+
+export default function AddToCartButton({ product }: { product: Product }) {
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
