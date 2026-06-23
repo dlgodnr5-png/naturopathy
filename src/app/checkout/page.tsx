@@ -1,5 +1,10 @@
 import Link from "next/link";
 import "./checkout.css";
+import PayPalCheckout from "./PayPalCheckout";
+
+// PayPal은 KRW 결제를 지원하지 않으므로 USD로 환산해 청구합니다.
+const PAYPAL_CURRENCY = process.env.NEXT_PUBLIC_PAYPAL_CURRENCY ?? "USD";
+const KRW_TO_USD_RATE = Number(process.env.NEXT_PUBLIC_PAYPAL_KRW_RATE ?? "1350");
 
 export default function CheckoutPage() {
   const cartItems = [
@@ -18,6 +23,7 @@ export default function CheckoutPage() {
   ];
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.priceCents * item.quantity, 0);
+  const paypalAmount = (subtotal / KRW_TO_USD_RATE).toFixed(2);
 
   return (
     <div className="checkout-container">
@@ -58,10 +64,10 @@ export default function CheckoutPage() {
             <div className="glass-container form-card">
               <h2 className="form-section-title">결제 수단</h2>
               <div className="payment-methods-grid">
-                <button className="payment-method-btn active">
+                <button className="payment-method-btn">
                   신용카드 (KCP)
                 </button>
-                <button className="payment-method-btn">
+                <button className="payment-method-btn active">
                   PayPal
                 </button>
                 <button className="payment-method-btn kakao">
@@ -76,10 +82,12 @@ export default function CheckoutPage() {
               </div>
               
               <div className="payment-placeholder-area">
-                {/* This area will render the specific payment widget based on selection */}
-                <div className="placeholder-box">
-                  결제 모듈 렌더링 영역 (Placeholder)
-                </div>
+                {/* PayPal (이해욱 개인계정) Smart Buttons 연동 */}
+                <PayPalCheckout
+                  amount={paypalAmount}
+                  currency={PAYPAL_CURRENCY}
+                  description="Naturopathy 주문"
+                />
               </div>
             </div>
           </div>
