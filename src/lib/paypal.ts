@@ -25,11 +25,21 @@ const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET ?? "";
 export const PAYPAL_CURRENCY = process.env.PAYPAL_CURRENCY ?? "USD";
 export const PAYPAL_RECEIVER_EMAIL = process.env.PAYPAL_RECEIVER_EMAIL ?? "";
 
+// Access Token은 약 9시간 유효하므로 메모리에 캐싱해 재사용합니다.
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
+
 async function getAccessToken(): Promise<string> {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error(
       "PayPal 자격 증명이 없습니다. PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET 환경 변수를 설정하세요."
     );
+  }
+
+  const now = Date.now();
+  // 만료 60초 전까지는 캐시된 토큰을 재사용합니다.
+  if (cachedToken && tokenExpiresAt > now + 60_000) {
+    return cachedToken;
   }
 
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
@@ -47,7 +57,9 @@ async function getAccessToken(): Promise<string> {
     throw new Error(`PayPal 인증 실패 (${res.status}): ${text}`);
   }
 
-  const data = (await res.json()) as { access_token: string };
+  const data = (await res.json()) as { access_token: string; expires_in: number };
+  cachedToken = data.access_token;
+  tokenExpiresAt = now + data.expires_in * 1000;
   return data.access_token;
 }
 

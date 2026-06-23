@@ -2,9 +2,7 @@ import Link from "next/link";
 import "./checkout.css";
 import PayPalCheckout from "./PayPalCheckout";
 
-// PayPal은 KRW 결제를 지원하지 않으므로 USD로 환산해 청구합니다.
 const PAYPAL_CURRENCY = process.env.NEXT_PUBLIC_PAYPAL_CURRENCY ?? "USD";
-const KRW_TO_USD_RATE = Number(process.env.NEXT_PUBLIC_PAYPAL_KRW_RATE ?? "1350");
 
 export default function CheckoutPage() {
   const cartItems = [
@@ -23,7 +21,6 @@ export default function CheckoutPage() {
   ];
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.priceCents * item.quantity, 0);
-  const paypalAmount = (subtotal / KRW_TO_USD_RATE).toFixed(2);
 
   return (
     <div className="checkout-container">
@@ -82,9 +79,10 @@ export default function CheckoutPage() {
               </div>
               
               <div className="payment-placeholder-area">
-                {/* PayPal (이해욱 개인계정) Smart Buttons 연동 */}
+                {/* PayPal (이해욱 개인계정) Smart Buttons 연동.
+                    가격은 서버 카탈로그에서 계산하므로 id/quantity만 전달합니다. */}
                 <PayPalCheckout
-                  amount={paypalAmount}
+                  items={cartItems.map((item) => ({ id: item.id, quantity: item.quantity }))}
                   currency={PAYPAL_CURRENCY}
                   description="Naturopathy 주문"
                 />
